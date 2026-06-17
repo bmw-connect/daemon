@@ -56,7 +56,7 @@ Three transports share the same newline-delimited JSON protocol:
 
 | Transport | Address | Use case |
 |---|---|---|
-| Unix socket | `/run/carplay-audio.sock` | TUI on the Pi |
+| Unix socket | `/run/carplay-audio/control.sock` | TUI on the Pi |
 | WebSocket | `ws://<pi-ip>:9000/ws` | Phone or browser over Wi-Fi |
 | BLE GATT | advertised as "carplay-audio" | Phone over Bluetooth |
 
@@ -77,7 +77,7 @@ Commands (client to service):
 {"cmd": "set_mute", "value": false}
 ```
 
-Messages pushed by the service (~2 Hz for stats):
+Messages pushed by the service (20 Hz for stats):
 ```json
 {"type": "state", "volume": 0.8, "eq_gains": [...], "loudness": true, "limiter": true, "muted": false, "source": "airplay"}
 {"type": "stats", "rms_l": 0.12, "rms_r": 0.11, "peak_l": 0.3, "peak_r": 0.28, "clipping": false, "limiter_active": false, "signal_active": true, "frames_per_sec": 705600}
