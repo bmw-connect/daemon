@@ -50,6 +50,10 @@ async fn register(adapter: &Adapter, hub: Hub) -> Result<BleSession> {
     let cmd_char = Characteristic {
         uuid: CHAR_CMD_UUID,
         write: Some(CharacteristicWrite {
+            // Write-with-response: iOS's write-without-response flow control
+            // (canSendWriteWithoutResponse) can wedge against BlueZ, silently
+            // dropping every write after the first until reconnect.
+            write: true,
             write_without_response: true,
             method: CharacteristicWriteMethod::Fun(Box::new(move |value, _req| {
                 let hub = hub_write.clone();
