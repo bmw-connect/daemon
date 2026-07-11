@@ -69,8 +69,9 @@ pub fn open_output(device: &str, sample_rate: u32) -> Result<PCM> {
         hwp.set_rate(sample_rate, ValueOr::Nearest)?;
         hwp.set_format(Format::FloatLE)?;
         hwp.set_access(Access::RWInterleaved)?;
-        hwp.set_period_size(PERIOD_SIZE as alsa::pcm::Frames, ValueOr::Nearest)?;
-        hwp.set_buffer_size((PERIOD_SIZE * 8) as alsa::pcm::Frames)?;
+        // _near variants: devices like the Pi's bcm2835 jack reject exact sizes.
+        hwp.set_period_size_near(PERIOD_SIZE as alsa::pcm::Frames, ValueOr::Nearest)?;
+        hwp.set_buffer_size_near((PERIOD_SIZE * 8) as alsa::pcm::Frames)?;
         pcm.hw_params(&hwp)?;
     }
     Ok(pcm)
