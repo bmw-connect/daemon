@@ -22,10 +22,10 @@ use stats::AudioStats;
 
 const AIRPLAY_LOOPBACK: &str = "hw:Loopback,1,0";
 const BT_LOOPBACK: &str = "hw:Loopback,1,1";
-const OUTPUT_DEVICE: &str = "plughw:sndrpihifiberry";
 
 fn main() -> Result<()> {
-    let initial_state = settings::load();
+    let (initial_state, output_device) = settings::load();
+    println!("[audio] output device: {}", output_device);
 
     let running = Arc::new(AtomicBool::new(true));
     let muted = Arc::new(AtomicBool::new(initial_state.muted));
@@ -90,11 +90,12 @@ fn main() -> Result<()> {
         let muted = muted.clone();
         let stats = audio_stats.clone();
         let source = source.clone();
+        let output_device = output_device.clone();
         thread::Builder::new()
             .name("audio-playback".into())
             .spawn(move || {
                 if let Err(e) = output::playback_loop(
-                    OUTPUT_DEVICE,
+                    &output_device,
                     airplay_rx,
                     bt_rx,
                     cmd_rx,

@@ -4,6 +4,12 @@ use std::path::PathBuf;
 
 use carplay_protocol::{DspState, EQ_BANDS, Source};
 
+pub const DEFAULT_OUTPUT_DEVICE: &str = "plughw:sndrpihifiberry";
+
+fn default_output_device() -> String {
+    DEFAULT_OUTPUT_DEVICE.into()
+}
+
 #[derive(Serialize, Deserialize)]
 pub struct Settings {
     pub volume: f32,
@@ -12,6 +18,9 @@ pub struct Settings {
     pub limiter: bool,
     pub muted: bool,
     pub source: Source,
+    // Absent from files written before this field existed — falls back to the HifiBerry.
+    #[serde(default = "default_output_device")]
+    pub output_device: String,
 }
 
 impl Default for Settings {
@@ -23,6 +32,7 @@ impl Default for Settings {
             limiter: true,
             muted: false,
             source: Source::Airplay,
+            output_device: default_output_device(),
         }
     }
 }
@@ -36,6 +46,7 @@ impl From<&DspState> for Settings {
             limiter: s.limiter,
             muted: s.muted,
             source: s.source,
+            output_device: default_output_device(),
         }
     }
 }
@@ -61,16 +72,32 @@ fn path() -> PathBuf {
     PathBuf::from(home).join(".carplay-audio.json")
 }
 
-pub fn load() -> DspState {
+fn load_settings() -> Settings {
     std::fs::read_to_string(path())
         .ok()
         .and_then(|s| serde_json::from_str::<Settings>(&s).ok())
-        .map(DspState::from)
-        .unwrap_or_else(DspState::new)
+        .unwrap_or_default()
+}
+
+pub fn load() -> (DspState, String) {
+    let file = path();
+    let settings = load_settings();
+    // Create the file on first run so it can be found and edited by hand.
+    if !file.exists() {
+        if let Ok(json) = serde_json::to_string_pretty(&settings) {
+            let _ = std::fs::write(&file, json);
+        }
+    }
+    println!("[settings] file: {}", file.display());
+    let output_device = settings.output_device.clone();
+    (DspState::from(settings), output_device)
 }
 
 pub fn save(state: &DspState) -> Result<()> {
-    let json = serde_json::to_string_pretty(&Settings::from(state))?;
+    let mut settings = Settings::from(state);
+    // The output device is only configurable by editing the file; keep whatever is there.
+    settings.output_device = load_settings().output_device;
+    let json = serde_json::to_string_pretty(&settings)?;
     std::fs::write(path(), json)?;
     Ok(())
 }

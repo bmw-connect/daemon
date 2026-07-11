@@ -7,6 +7,9 @@ Wants=shairport-sync.service bluealsa.service bluealsa-aplay.service
 [Service]
 Type=simple
 ExecStart=/usr/local/bin/carplay-audio
+# Pin the settings file location (~/.carplay-audio.json) — HOME is not set
+# for root services, which would silently move the file to the cwd.
+Environment=HOME=/root
 Restart=on-failure
 RestartSec=2
 
