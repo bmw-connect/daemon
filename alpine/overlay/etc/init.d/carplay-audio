@@ -1,5 +1,9 @@
 #!/sbin/openrc-run
 # carplay-audio DSP daemon — reads the ALSA loopbacks, outputs to the DAC.
+#
+# $CARPLAY_HOME (from /etc/conf.d/carplay-audio) decides where the settings
+# file .carplay-audio.json lives. Defaults to /root; the SD-card image points
+# it at the boot media so settings survive reboots on a diskless system.
 
 description="carplay-audio DSP daemon"
 
@@ -10,8 +14,8 @@ respawn_max=0
 output_log="/var/log/carplay-audio.log"
 error_log="/var/log/carplay-audio.log"
 
-# Settings file lives at $HOME/.carplay-audio.json — pin it like the systemd unit does.
-export HOME="/root"
+: "${CARPLAY_HOME:=/root}"
+export HOME="$CARPLAY_HOME"
 
 depend() {
     need dbus bluetooth
@@ -23,4 +27,8 @@ start_pre() {
     # Unix control socket directory (RuntimeDirectory= equivalent)
     checkpath -d -m 0755 /run/carplay-audio
     checkpath -f -m 0644 "$output_log"
+    # Settings on the boot media (diskless image): it is mounted read-only
+    case "$CARPLAY_HOME" in
+        /media/*) mount -o remount,rw "$CARPLAY_HOME" 2>/dev/null || true ;;
+    esac
 }

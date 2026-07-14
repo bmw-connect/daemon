@@ -33,13 +33,24 @@ deploy() {
     echo "Deployed to $host — run 'doas sh provision.sh' (or as root) there."
 }
 
+build_overlay() {
+    [ -f "${BINDIR}/carplay-audio" ] || { build_image && build_binary; }
+    echo "Building plug-and-play SD card image..."
+    docker run --rm -t --platform linux/arm64 \
+        -v "$(pwd)":/build \
+        alpine:3.24 sh /build/alpine/mkimage.sh
+}
+
 case "${1:-build}" in
-    image)  build_image ;;
-    build)  build_binary ;;
-    deploy) deploy "${2:-}" ;;
-    all)    build_image && build_binary ;;
+    image)   build_image ;;
+    build)   build_binary ;;
+    deploy)  deploy "${2:-}" ;;
+    overlay) build_overlay ;;
+    all)     build_image && build_binary ;;
     *)
-        echo "Usage: $0 [image|build|deploy <user@host>|all]"
+        echo "Usage: $0 [image|build|deploy <user@host>|overlay|all]"
+        echo "  overlay -- build target-alpine/bmw-connect-alpine.img:"
+        echo "             flash it, boot the Pi, done (no provisioning)"
         exit 1
         ;;
 esac

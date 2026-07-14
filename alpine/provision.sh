@@ -73,8 +73,8 @@ modprobe snd_aloop pcm_substreams=2
 echo "[4/7] Applying overlay..."
 cp -a "$SCRIPT_DIR/overlay/etc/." /etc/
 cp "$SCRIPT_DIR/overlay/usr/local/bin/bt-agent.py" /usr/local/bin/bt-agent.py
-chmod +x /etc/init.d/carplay-audio /etc/init.d/bluealsa /etc/init.d/bluealsa-aplay \
-         /etc/init.d/bt-agent /etc/init.d/bluetooth-init /etc/init.d/shairport-sync \
+chmod +x /etc/init.d/carplay-audio /etc/init.d/bluealsa-aplay \
+         /etc/init.d/bt-agent /etc/init.d/bluetooth-init \
          /usr/local/bin/bt-agent.py
 
 # ---------------------------------------------------------------------------

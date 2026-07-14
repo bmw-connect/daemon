@@ -1,0 +1,3 @@
+# Diskless image: keep the settings file (.carplay-audio.json) on the boot
+# media so volume/EQ/output_device survive reboots (the root fs is a tmpfs).
+CARPLAY_HOME=/media/mmcblk0p1

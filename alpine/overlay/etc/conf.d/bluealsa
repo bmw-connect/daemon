@@ -1,0 +1,2 @@
+# bluealsa profiles — A2DP sink only (we are a car stereo, not a source)
+BLUEALSA_CONF="-p a2dp-sink"

@@ -3,6 +3,35 @@
 Production-oriented port of the Raspbian setup: musl binaries, OpenRC
 services, and a pinned kernel/BlueZ pair known to work.
 
+## TL;DR — plug-and-play SD card
+
+```sh
+alpine/build.sh overlay      # → target-alpine/bmw-connect-alpine.img
+```
+
+Flash the image (Raspberry Pi Imager, balenaEtcher, or
+`dd if=target-alpine/bmw-connect-alpine.img of=/dev/rdiskN bs=4m`), boot the
+Pi 4, done. No provisioning, no network needed, nothing to run on the Pi.
+
+The image boots Alpine **diskless**: the whole OS is assembled in RAM at
+every boot from an offline apk cache on the FAT partition, and our
+`bmw-connect.apkovl.tar.gz` overlay applies the configs, the OpenRC services
+and the `carplay-audio` binary. The SD card stays read-only (power cuts are
+harmless — it's a car); the only file ever written is `carplay-audio.json`
+(daemon settings) on the FAT partition.
+
+User-editable files on the FAT partition (from any computer):
+
+| File | Purpose |
+|---|---|
+| `wifi.conf` | WiFi credentials (see `wifi.conf.example`) |
+| `authorized_keys` | SSH public keys for root |
+| `carplay-audio.json` | daemon settings — `output_device`, volume, EQ |
+| `config.txt` | Pi boot config — uncomment `dtoverlay=hifiberry-dac` for a HifiBerry |
+
+To persist system-level changes made live over SSH: `lbu commit`.
+The `provision.sh` flow below remains for classic sys-mode installs.
+
 ## Why Alpine 3.24 + bluez from edge
 
 LE advertising is broken by a specific kernel/BlueZ combination:

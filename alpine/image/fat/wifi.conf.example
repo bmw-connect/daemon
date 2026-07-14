@@ -1,0 +1,10 @@
+# WiFi configuration — copy this file to "wifi.conf" (same folder) and edit.
+# It is applied at every boot.
+ctrl_interface=/var/run/wpa_supplicant
+update_config=1
+country=FR
+
+network={
+    ssid="MyNetwork"
+    psk="MyPassword"
+}
