@@ -35,7 +35,17 @@ pub async fn serve(hub: Hub) -> Result<()> {
 
     eprintln!("[ble] adapter: {}", adapter.name());
 
-    let _session = register(&adapter, hub).await?;
+    // Registration fails transiently when bluetoothd hasn't released the
+    // previous run's advertisement yet or the adapter is still powering up.
+    let _session = loop {
+        match register(&adapter, hub.clone()).await {
+            Ok(s) => break s,
+            Err(e) => {
+                eprintln!("[ble] {} — retrying in 5s", e);
+                tokio::time::sleep(std::time::Duration::from_secs(5)).await;
+            }
+        }
+    };
 
     // Keep the task alive — BLE stops if we drop the handles.
     loop {
