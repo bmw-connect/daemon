@@ -1,5 +1,6 @@
 # Rust
 /target
+/target-alpine
 
 # macOS
 .DS_Store

@@ -1,0 +1,17 @@
+#!/sbin/openrc-run
+# Plays Bluetooth audio into the ALSA loopback (substream 1).
+# pcm.bt_sink is defined in /etc/asound.conf: it normalises any BT codec
+# format (44100/48000 Hz) to 48000 Hz S16LE before writing to the loopback.
+
+description="BlueALSA aplay — Bluetooth audio to hw:Loopback,0,1"
+
+supervisor=supervise-daemon
+command="/usr/bin/bluealsa-aplay"
+command_args="--pcm=bt_sink"
+respawn_delay=5
+respawn_max=0
+
+depend() {
+    need bluealsa
+    after modules
+}

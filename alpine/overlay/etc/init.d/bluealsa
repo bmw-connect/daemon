@@ -1,0 +1,14 @@
+#!/sbin/openrc-run
+# BlueALSA daemon — exposes Bluetooth A2DP audio as ALSA PCMs.
+
+description="BlueALSA Bluetooth audio daemon (A2DP sink)"
+
+supervisor=supervise-daemon
+command="/usr/bin/bluealsa"
+command_args="--profile=a2dp-sink"
+respawn_delay=3
+respawn_max=0
+
+depend() {
+    need dbus bluetooth
+}

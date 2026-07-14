@@ -1,0 +1,26 @@
+#!/sbin/openrc-run
+# carplay-audio DSP daemon — reads the ALSA loopbacks, outputs to the DAC.
+
+description="carplay-audio DSP daemon"
+
+supervisor=supervise-daemon
+command="/usr/local/bin/carplay-audio"
+respawn_delay=2
+respawn_max=0
+output_log="/var/log/carplay-audio.log"
+error_log="/var/log/carplay-audio.log"
+
+# Settings file lives at $HOME/.carplay-audio.json — pin it like the systemd unit does.
+export HOME="/root"
+
+depend() {
+    need dbus bluetooth
+    use bluealsa-aplay shairport-sync
+    after modules
+}
+
+start_pre() {
+    # Unix control socket directory (RuntimeDirectory= equivalent)
+    checkpath -d -m 0755 /run/carplay-audio
+    checkpath -f -m 0644 "$output_log"
+}

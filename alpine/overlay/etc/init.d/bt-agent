@@ -1,0 +1,20 @@
+#!/sbin/openrc-run
+# Bluetooth auto-pairing agent (NoInputNoOutput — accepts everything).
+
+description="Bluetooth auto-pairing agent"
+
+supervisor=supervise-daemon
+command="/usr/bin/python3"
+command_args="/usr/local/bin/bt-agent.py"
+respawn_delay=2
+respawn_max=0
+output_log="/var/log/bt-agent.log"
+error_log="/var/log/bt-agent.log"
+
+depend() {
+    need dbus bluetooth
+}
+
+start_pre() {
+    checkpath -f -m 0644 "$output_log"
+}

@@ -1,0 +1,32 @@
+#!/sbin/openrc-run
+# One-shot Bluetooth bring-up: power on, alias, discoverable, pairable.
+# Equivalent of the systemd bluetooth-init.service on the Raspbian setup.
+
+description="Bluetooth power-on, alias and discoverable init"
+
+depend() {
+    need bluetooth
+    before bluealsa bt-agent carplay-audio
+}
+
+start() {
+    ebegin "Configuring Bluetooth adapter"
+    command -v rfkill >/dev/null && rfkill unblock bluetooth 2>/dev/null
+
+    # hci0 can take a moment to accept commands after bluetoothd starts
+    i=0
+    while [ "$i" -lt 10 ]; do
+        bluetoothctl power on >/dev/null 2>&1 && break
+        i=$((i + 1))
+        sleep 1
+    done
+
+    bluetoothctl system-alias "BMW E46" >/dev/null
+    bluetoothctl discoverable on >/dev/null
+    bluetoothctl pairable on >/dev/null
+    eend $?
+}
+
+stop() {
+    return 0
+}
