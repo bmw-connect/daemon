@@ -24,6 +24,7 @@ const AIRPLAY_LOOPBACK: &str = "hw:Loopback,1,0";
 const BT_LOOPBACK: &str = "hw:Loopback,1,1";
 
 fn main() -> Result<()> {
+    println!("[build] {}", env!("BUILD_TS"));
     let (initial_state, output_device) = settings::load();
     println!("[audio] output device: {}", output_device);
 
